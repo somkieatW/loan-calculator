@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Home loan tools &mdash; planner + single loan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,400..700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F1F5F3; --card:#FFFFFF; --ink:#0E1F2B; --ink-soft:#4B6070; --line:#D3DEDA;
+  --jade:#16705C; --jade-soft:#D8E8E2; --brass:#8C6D24; --crimson:#9E3A30; --focus:#16705C;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0B1620; --card:#122430; --ink:#E7EFEC; --ink-soft:#9BB0BB; --line:#263B48;
+    --jade:#4FBF9E; --jade-soft:#173434; --brass:#D4AA52; --crimson:#E8776A; --focus:#4FBF9E;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0B1620; --card:#122430; --ink:#E7EFEC; --ink-soft:#9BB0BB; --line:#263B48;
+  --jade:#4FBF9E; --jade-soft:#173434; --brass:#D4AA52; --crimson:#E8776A; --focus:#4FBF9E;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:'Archivo','Helvetica Neue',Arial,sans-serif;
+  font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+.wrap{max-width:900px;margin:0 auto;padding:32px 20px 72px}
+h1{font-size:clamp(1.45rem,4.4vw,2.05rem);font-weight:600;font-stretch:108%;letter-spacing:-0.015em;line-height:1.15;margin:0 0 6px}
+.sub{color:var(--ink-soft);margin:0 0 26px;max-width:64ch}
+
+.facts{display:flex;flex-wrap:wrap;border:1px solid var(--line);border-radius:10px;background:var(--card);overflow:hidden;margin-bottom:26px}
+.fact{flex:1 1 145px;padding:14px 16px;border-right:1px solid var(--line)}
+.fact:last-child{border-right:0}
+.fact span{display:block;color:var(--ink-soft);font-size:.8rem}
+.fact strong{font-weight:600;font-size:1.02rem}
+
+fieldset{border:0;margin:0;padding:0}
+.control{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px;margin-bottom:10px}
+.control legend{padding:0;font-weight:600;font-size:1.05rem}
+.help{color:var(--ink-soft);font-size:.9rem;margin:2px 0 16px}
+.entry{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.baht{color:var(--ink-soft);font-size:1.2rem}
+input[type=number]{font:inherit;font-size:1.55rem;font-weight:600;font-stretch:105%;width:165px;padding:6px 10px;
+  color:var(--ink);background:transparent;border:0;border-bottom:2px solid var(--jade);border-radius:0}
+input[type=number]:focus-visible{outline:2px solid var(--focus);outline-offset:3px}
+.total-note{color:var(--ink-soft);font-size:.92rem}
+.total-note b{color:var(--ink);font-weight:600}
+
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;background:transparent;margin:20px 0 4px;height:26px}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;margin-top:-10px;border-radius:50%;
+  background:var(--jade);border:3px solid var(--card);cursor:grab;box-shadow:0 0 0 1px var(--jade)}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:var(--jade);
+  border:3px solid var(--card);cursor:grab;box-shadow:0 0 0 1px var(--jade)}
+input[type=range]:focus-visible{outline:2px solid var(--focus);outline-offset:4px;border-radius:4px}
+.ticks{display:flex;justify-content:space-between;color:var(--ink-soft);font-size:.78rem}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{font:inherit;font-size:.87rem;padding:7px 13px;cursor:pointer;color:var(--ink);background:transparent;
+  border:1px solid var(--line);border-radius:999px}
+.chip:hover{border-color:var(--jade);color:var(--jade)}
+.chip[aria-pressed="true"]{background:var(--jade-soft);border-color:var(--jade);color:var(--jade);font-weight:600}
+.chip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+.splitbar{display:flex;height:34px;border-radius:6px;overflow:hidden;border:1px solid var(--line);margin-top:6px}
+.splitbar div{display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden}
+.splitbar .a{background:var(--jade);color:#fff}
+.splitbar .b{background:var(--brass);color:#fff}
+.splitlab{display:flex;justify-content:space-between;color:var(--ink-soft);font-size:.82rem;margin-top:6px}
+.splitbar div{position:relative}
+.splitbar .amt{position:relative;z-index:1}
+.splitbar .floor{position:absolute;top:0;bottom:0;border-right:2px dashed rgba(255,255,255,.75);pointer-events:none}
+.warn{margin:12px 0 0;padding:10px 12px;border-radius:6px;background:var(--crimson);color:#fff;font-size:.88rem;font-weight:500}
+.warn[hidden]{display:none}
+.minnote{color:var(--ink-soft);font-size:.82rem;margin:8px 0 0}
+.rollrow{display:flex;align-items:center;gap:9px;margin-top:14px;color:var(--ink-soft);font-size:.9rem}
+.rollrow input{width:18px;height:18px;accent-color:var(--jade)}
+
+.verdict{margin:26px 0 0;padding:26px 24px 22px;border-radius:10px;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--crimson)}
+.verdict.clear{border-left-color:var(--jade)}
+.verdict-label{color:var(--ink-soft);font-size:.95rem;margin:0 0 2px}
+.big{font-size:clamp(2.1rem,8.5vw,3.7rem);font-weight:700;font-stretch:112%;letter-spacing:-0.03em;line-height:1;margin:0;color:var(--crimson);transition:color .2s ease}
+.verdict.clear .big{color:var(--jade)}
+.big .cur{font-size:.5em;font-weight:500;vertical-align:.28em;margin-right:.12em;letter-spacing:0}
+.big .unit{font-size:.33em;font-weight:500;letter-spacing:0;margin-left:.25em;color:var(--ink-soft)}
+.verdict p.read{margin:14px 0 0;max-width:64ch;color:var(--ink-soft)}
+.verdict p.read b{color:var(--ink);font-weight:600}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:10px;overflow:hidden;margin-top:8px}
+.cell{background:var(--card);padding:16px}
+.cell span{display:block;color:var(--ink-soft);font-size:.8rem;margin-bottom:3px}
+.cell strong{font-size:1.2rem;font-weight:600;font-stretch:105%;letter-spacing:-0.01em}
+.cell.i strong{color:var(--brass)}
+.cell.s strong{color:var(--jade)}
+.cell.bad strong{color:var(--crimson)}
+
+.chart-card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px;margin-top:26px}
+.chart-head{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:6px}
+.chart-head h2{font-size:1.05rem;font-weight:600;margin:0}
+.legend{display:flex;gap:16px;color:var(--ink-soft);font-size:.83rem;flex-wrap:wrap}
+.legend i{display:inline-block;width:16px;height:0;border-top:3px solid var(--jade);vertical-align:.3em;margin-right:6px}
+.legend .base i{border-top:3px dashed var(--ink-soft)}
+svg{display:block;width:100%;height:auto;overflow:visible}
+
+details{margin-top:12px;background:var(--card);border:1px solid var(--line);border-radius:10px}
+details.loanbox{margin-top:26px;border-color:var(--jade)}
+summary{padding:15px 20px;cursor:pointer;font-weight:600;list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:'+';float:right;color:var(--ink-soft);font-weight:400}
+details[open] summary::after{content:'\2013'}
+summary:focus-visible{outline:2px solid var(--focus);outline-offset:-2px;border-radius:10px}
+.inner{padding:0 20px 20px}
+.loanform{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px}
+.loanform label{display:block;color:var(--ink-soft);font-size:.84rem;margin-bottom:4px}
+.loanform input{font:inherit;font-size:1rem;font-weight:400;width:100%;padding:8px 10px;color:var(--ink);
+  background:transparent;border:1px solid var(--line);border-radius:6px}
+.loanform input:focus-visible{outline:2px solid var(--focus);outline-offset:1px}
+.grouphead{font-weight:600;font-size:.92rem;margin:18px 0 8px;padding-top:14px;border-top:1px solid var(--line)}
+.grouphead:first-child{margin-top:0;padding-top:0;border-top:0}
+
+.tablescroll{overflow-x:auto;max-height:430px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem;min-width:620px}
+#two table{min-width:820px}
+#rows td.done{color:var(--jade);font-weight:600}
+#rows td.tot{font-weight:600}
+th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--ink-soft);font-weight:500;font-size:.78rem;position:sticky;top:0;background:var(--card)}
+th:first-child,td:first-child{text-align:left}
+td.int{color:var(--brass)}
+.foot{color:var(--ink-soft);font-size:.85rem;margin-top:24px;max-width:68ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+.pagehead{max-width:900px;margin:0 auto;padding:30px 20px 0}
+.pagehead h1{font-size:clamp(1.3rem,4vw,1.7rem);margin:0 0 4px}
+.pagehead p{color:var(--ink-soft);margin:0 0 14px;max-width:62ch;font-size:.95rem}
+.toolnav{display:flex;flex-wrap:wrap;gap:8px;position:sticky;top:env(safe-area-inset-top,0px);z-index:5;
+  padding:10px 0;background:var(--paper)}
+.toolnav a{font-size:.88rem;padding:7px 13px;border:1px solid var(--line);border-radius:999px;
+  color:var(--ink);text-decoration:none;background:var(--card)}
+.toolnav a:hover{border-color:var(--jade);color:var(--jade)}
+.toolnav a:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.section-head{padding:34px 0 4px;border-top:2px solid var(--ink);margin-bottom:18px}
+#two .section-head{border-top:0;padding-top:8px}
+.section-head .tag{display:inline-block;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:600;color:var(--jade);margin-bottom:6px}
+.section-head h2{font-size:1.15rem;font-weight:600;margin:0 0 4px}
+.section-head p{color:var(--ink-soft);font-size:.92rem;margin:0;max-width:64ch}
+.wrap{padding-top:10px}
+@media (min-width:1500px){
+  .sidebyside{display:flex;align-items:flex-start;gap:0}
+  .sidebyside .wrap{flex:1 1 0;min-width:0;max-width:760px}
+  .sidebyside #one{border-left:2px solid var(--ink)}
+  .sidebyside .section-head{border-top:0}
+}
+</style>
+</head>
+<body>
+<div class="pagehead">
+  <h1>Home loan tools</h1>
+  <p>Two calculators, each with its own numbers. The planner splits one monthly budget across both facilities; the single-loan tool below tests extra payments on one balance at a time.</p>
+  <nav class="toolnav">
+    <a href="#two">Two-loan planner</a>
+    <a href="#one">Single loan</a>
+  </nav>
+</div>
+<div class="sidebyside">
+
+<div class="wrap" id="two">
+  <div class="section-head">
+    <span class="tag">Tool 1</span>
+    <h2>Two-loan planner &mdash; one budget, split two ways</h2>
+    <p>Set the total you pay each month, then decide how much of it goes to each loan.</p>
+  </div>
+
+
+  <h1 id="headline">Loading</h1>
+  <p class="sub" id="subhead"></p>
+
+  <div class="facts">
+    <div class="fact"><span>Total owed</span><strong id="f-bal"></strong></div>
+    <div class="fact"><span>Interest this month</span><strong id="f-int"></strong></div>
+    <div class="fact"><span id="f-prin-l">Principal this month</span><strong id="f-prin"></strong></div>
+    <div class="fact"><span id="f-need-l">To clear on time</span><strong id="f-need"></strong></div>
+  </div>
+
+  <fieldset class="control">
+    <legend>What you pay in total each month</legend>
+    <p class="help" id="budget-help"></p>
+    <div class="entry">
+      <span class="baht" aria-hidden="true">&#3647;</span>
+      <input id="budget" type="number" min="0" step="100" value="25000" aria-label="Total paid each month">
+      <span class="total-note" id="budget-note"></span>
+    </div>
+    <input id="bslider" type="range" min="0" max="50000" step="200" value="25000" aria-label="Total monthly payment slider">
+    <div class="ticks" id="bticks"></div>
+    <div class="chips" id="bchips"></div>
+  </fieldset>
+
+  <fieldset class="control">
+    <legend>How you split it</legend>
+    <p class="help" id="split-help"></p>
+    <input id="sslider" type="range" min="0" max="25000" step="100" value="2600" aria-label="Amount paid to the second loan">
+    <div class="splitbar"><div class="a" id="bar-a"><span class="amt" id="amt-a"></span><span class="floor" id="floor-a"></span></div><div class="b" id="bar-b"><span class="amt" id="amt-b"></span><span class="floor" id="floor-b"></span></div></div>
+    <div class="splitlab"><span id="lab-a"></span><span id="lab-b"></span></div>
+    <p class="warn" id="split-warn" hidden></p>
+    <div class="chips" id="schips"></div>
+    <label class="rollrow"><input type="checkbox" id="roll" checked>
+      <span>When one loan is cleared, roll its payment into the other</span></label>
+  </fieldset>
+
+  <section class="verdict" id="verdict" aria-live="polite">
+    <p class="verdict-label" id="v-label"></p>
+    <p class="big"><span class="cur" id="v-cur">&#3647;</span><span id="v-amount">0</span><span class="unit" id="v-unit"></span></p>
+    <p class="read" id="v-read"></p>
+  </section>
+
+  <div class="grid">
+    <div class="cell i"><span>Total interest paid</span><strong id="r-int"></strong></div>
+    <div class="cell s"><span id="l-save">Interest vs comparison</span><strong id="r-save"></strong></div>
+    <div class="cell"><span id="l-horizon">Owed at horizon</span><strong id="r-horizon"></strong></div>
+    <div class="cell"><span id="l-small">Second loan cleared</span><strong id="r-small"></strong></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-head">
+      <h2>Total balance, month by month</h2>
+      <div class="legend">
+        <span><i></i><span id="leg-now">This plan</span></span>
+        <span class="base"><i></i><span id="leg-base">Comparison</span></span>
+      </div>
+    </div>
+    <svg id="chart" viewBox="0 0 700 280" role="img" aria-labelledby="chart-desc"></svg>
+    <p id="chart-desc" class="foot" style="margin-top:4px"></p>
+  </div>
+
+  <details class="loanbox" open>
+    <summary>Your numbers &mdash; everything above is built from these</summary>
+    <div class="inner">
+      <p class="grouphead" id="h-a">Main loan</p>
+      <div class="loanform">
+        <div><label for="i-name-a">Name</label><input id="i-name-a" type="text" value="Main loan"></div>
+        <div><label for="i-bal-a">Balance</label><input id="i-bal-a" type="number" step="0.01" min="0" value="7459046"></div>
+        <div><label for="i-rate-a">Rate (% / year)</label><input id="i-rate-a" type="number" step="0.01" min="0" value="2.5"></div>
+        <div><label for="i-min-a">Minimum payment the bank allows</label><input id="i-min-a" type="number" step="100" min="0" value="22500"></div>
+      </div>
+      <p class="grouphead" id="h-b">Second loan</p>
+      <div class="loanform">
+        <div><label for="i-name-b">Name</label><input id="i-name-b" type="text" value="Top-up loan"></div>
+        <div><label for="i-bal-b">Balance</label><input id="i-bal-b" type="number" step="0.01" min="0" value="692792"></div>
+        <div><label for="i-rate-b">Rate (% / year)</label><input id="i-rate-b" type="number" step="0.01" min="0" value="2.5"></div>
+        <div><label for="i-min-b">Minimum payment the bank allows</label><input id="i-min-b" type="number" step="100" min="0" value="2500"></div>
+      </div>
+      <p class="grouphead">Everything else</p>
+      <div class="loanform">
+        <div><label for="i-term">Months left on the contract</label><input id="i-term" type="number" step="1" min="1" max="720" value="324"></div>
+        <div><label for="i-cmp">Compare against (THB / month)</label><input id="i-cmp" type="number" step="100" min="0" value="30200"></div>
+        <div><label for="i-cmplab">Comparison label</label><input id="i-cmplab" type="text" value="Old payment"></div>
+        <div><label for="i-cur">Currency symbol</label><input id="i-cur" type="text" value="&#3647;" maxlength="4"></div>
+      </div>
+    </div>
+  </details>
+
+  <details>
+    <summary>Full schedule</summary>
+    <div class="inner tablescroll">
+      <table>
+        <thead><tr><th>Month</th><th id="th-a">To main</th><th id="th-b">To second</th>
+          <th>Interest</th><th>Principal</th>
+          <th id="th-left-a">Main left</th><th id="th-left-b">Second left</th><th>Total left</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+  </details>
+
+  <p class="foot" id="foot"></p>
+</div>
+
+
+<div class="wrap" id="one">
+  <div class="section-head">
+    <span class="tag">Tool 2</span>
+    <h2>Single loan &mdash; what one extra payment does</h2>
+    <p>One balance, one payment, one slider for the extra. Set up separately from the planner above, so you can point it at either facility on its own.</p>
+  </div>
+
+  <h1 id="s-headline">Loading</h1>
+  <p class="sub" id="s-subhead"></p>
+
+  <div class="facts">
+    <div class="fact"><span>Amount owed</span><strong id="s-f-bal"></strong></div>
+    <div class="fact"><span>Interest</span><strong id="s-f-rate"></strong></div>
+    <div class="fact"><span>Term</span><strong id="s-f-term"></strong></div>
+    <div class="fact"><span>Required payment</span><strong id="s-f-pay"></strong></div>
+    <div class="fact"><span id="s-f-need-l">To clear it</span><strong id="s-f-need"></strong></div>
+  </div>
+
+  <fieldset class="control">
+    <legend>Extra each month</legend>
+    <p class="help" id="s-extra-help"></p>
+    <div class="entry">
+      <span class="baht" aria-hidden="true">&#3647;</span>
+      <input id="s-extra" type="number" min="0" step="10" value="0" aria-label="Extra paid each month, single loan">
+      <span class="total-note">so you pay <b id="s-totalpay"></b> a month</span>
+    </div>
+    <input id="s-slider" type="range" min="0" max="2500" step="25" value="0" aria-label="Extra per month slider, single loan">
+    <div class="ticks" id="s-ticks"></div>
+    <div class="chips" id="s-chips"></div>
+  </fieldset>
+
+  <section class="verdict" id="s-verdict" aria-live="polite">
+    <p class="verdict-label" id="s-v-label"></p>
+    <p class="big"><span class="cur">&#3647;</span><span id="s-v-amount">0</span></p>
+    <p class="read" id="s-v-read"></p>
+  </section>
+
+  <div class="grid">
+    <div class="cell"><span id="s-l-paid">Paid in</span><strong id="s-r-paid"></strong></div>
+    <div class="cell i"><span>Of that, interest</span><strong id="s-r-int"></strong></div>
+    <div class="cell"><span>Principal cleared</span><strong id="s-r-prin"></strong></div>
+    <div class="cell s"><span id="s-l-save">Interest saved</span><strong id="s-r-save"></strong></div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-head">
+      <h2>Balance month by month</h2>
+      <div class="legend">
+        <span><i></i>Your plan</span>
+        <span class="base"><i></i><span id="s-leg-base">Required payment only</span></span>
+      </div>
+    </div>
+    <svg id="s-chart" viewBox="0 0 700 280" role="img" aria-labelledby="s-chart-desc"></svg>
+    <p id="s-chart-desc" class="foot" style="margin-top:4px"></p>
+  </div>
+
+  <details class="loanbox" open>
+    <summary>Loan numbers for this tool &mdash; every figure above comes from these</summary>
+    <div class="inner">
+      <div class="loanform">
+        <div><label for="s-i-bal">Amount owed</label><input id="s-i-bal" type="number" step="0.01" min="0" value="692792"></div>
+        <div><label for="s-i-rate">Yearly interest (%)</label><input id="s-i-rate" type="number" step="0.01" min="0" value="2.5"></div>
+        <div><label for="s-i-term">Months to look at</label><input id="s-i-term" type="number" step="1" min="1" max="720" value="324"></div>
+        <div><label for="s-i-pay">Required payment</label><input id="s-i-pay" type="number" step="1" min="0" value="2500"></div>
+        <div><label for="s-i-cur">Currency symbol</label><input id="s-i-cur" type="text" value="&#3647;" maxlength="4"></div>
+      </div>
+      <div class="termrow">Quick terms<div class="chips" id="s-termchips"></div></div>
+    </div>
+  </details>
+
+  <details>
+    <summary>Full schedule</summary>
+    <div class="inner tablescroll">
+      <table>
+        <thead><tr><th>Month</th><th>Payment</th><th>Interest</th><th>Principal</th><th>Balance left</th></tr></thead>
+        <tbody id="s-rows"></tbody>
+      </table>
+    </div>
+  </details>
+
+  <p class="foot" id="s-foot"></p>
+</div>
+</div>
+<script>
+(function(){
+  function stub(id){
+    if (typeof console !== 'undefined') console.warn('loan-tools: missing element #'+id);
+    return {style:{}, dataset:{}, textContent:'', innerHTML:'', value:'', hidden:true, checked:false,
+            className:'', parentElement:{}, setAttribute:function(){}, addEventListener:function(){},
+            appendChild:function(){}, classList:{add:function(){}, remove:function(){}}};
+  }
+  var $ = function(id){ return document.getElementById(id) || stub(id); };
+  var budgetIn = $('budget'), bslider = $('bslider'), sslider = $('sslider'), roll = $('roll');
+
+  var cfg = {
+    a:{name:'Main loan', bal:7459046, rate:2.5, min:22500},
+    b:{name:'Top-up loan', bal:692792, rate:2.5, min:2500},
+    term:324, cmp:30200, cmplab:'Old payment', cur:'\u0E3F'
+  };
+  var MAXM = 900;
+
+  function money(n,dp){ dp=dp||0; return isFinite(n) ? n.toLocaleString('en-US',{minimumFractionDigits:dp,maximumFractionDigits:dp}) : '\u2014'; }
+  function cash(n,dp){ return cfg.cur + money(n,dp); }
+  function total(){ return cfg.a.bal + cfg.b.bal; }
+  function mrate(o){ return (o.rate/100)/12; }
+  function monthInterest(){ return cfg.a.bal*mrate(cfg.a) + cfg.b.bal*mrate(cfg.b); }
+  function yrs(m){ return (m/12).toFixed(1); }
+  function nice(v){
+    if (v<=0) return 0;
+    var mag=Math.pow(10,Math.floor(Math.log(v)/Math.LN10)), steps=[1,1.5,2,2.5,3,4,5,7.5,10];
+    for (var k=0;k<steps.length;k++) if (v <= steps[k]*mag-1e-9) return steps[k]*mag;
+    return 10*mag;
+  }
+
+  function requiredFor(months){
+    var lo = 0, hi = total(), mid, res;
+    for (var k=0;k<80;k++){
+      mid = (lo+hi)/2;
+      res = simulate(mid, splitOf(mid), true, months+1);
+      if (res.off && res.off <= months) hi = mid; else lo = mid;
+    }
+    return hi;
+  }
+
+  function floorA(){ return cfg.a.bal > 0.005 ? Math.max(0, cfg.a.min) : 0; }
+  function floorB(){ return cfg.b.bal > 0.005 ? Math.max(0, cfg.b.min) : 0; }
+  function floorTotal(){ return floorA() + floorB(); }
+  function feasible(budget){ return budget >= floorTotal() - 0.005; }
+
+  function splitRange(budget){
+    var lo = Math.min(floorB(), budget);
+    var hi = Math.max(lo, budget - floorA());
+    if (hi > budget) hi = budget;
+    return {lo:lo, hi:hi};
+  }
+
+  function splitOf(budget){
+    var rng = splitRange(budget);
+    var y = Number(sslider.value);
+    if (!isFinite(y)) y = rng.lo;
+    return Math.max(rng.lo, Math.min(y, rng.hi));
+  }
+
+  function simulate(budget, toB, rollOver, cap){
+    cap = cap || MAXM;
+    var a = cfg.a.bal, b = cfg.b.bal;
+    var ra = mrate(cfg.a), rb = mrate(cfg.b);
+    var rows = [], curve = [a+b], ti = 0, tp = 0, off = null, bOff = null, aOff = null, peak = a+b;
+    var toA = Math.max(0, budget - toB);
+    var fa = Math.max(0, cfg.a.min), fb = Math.max(0, cfg.b.min);
+    for (var m=1; m<=cap; m++){
+      var xa = toA, xb = toB;
+      if (rollOver){
+        if (b <= 0.005){ xa = budget; xb = 0; }
+        else if (a <= 0.005){ xb = budget; xa = 0; }
+      }
+      if (a > 0.005 && b > 0.005){
+        var bud = xa + xb;
+        var fa2 = Math.min(fa, bud), fb2 = Math.min(fb, bud - Math.min(fa, bud));
+        if (xa < fa2){ xa = fa2; xb = bud - fa2; }
+        if (xb < fb2){ xb = fb2; xa = bud - fb2; }
+      }
+      var aOpen = a > 0.005, bOpen = b > 0.005;
+      var ia = aOpen ? a*ra : 0, ib = bOpen ? b*rb : 0;
+      var dueA = a + ia, dueB = b + ib;
+      var pa = aOpen ? Math.min(xa, dueA) : 0;
+      var pb = bOpen ? Math.min(xb, dueB) : 0;
+      if (rollOver){
+        var spill = (xa + xb) - (pa + pb);
+        if (spill > 0.005 && bOpen){
+          var takeB = Math.min(spill, dueB - pb);
+          pb += takeB; spill -= takeB;
+        }
+        if (spill > 0.005 && aOpen){
+          pa += Math.min(spill, dueA - pa);
+        }
+      }
+      a = aOpen ? dueA - pa : 0; if (a <= 0.005){ a = 0; if (aOpen && aOff === null) aOff = m; }
+      b = bOpen ? dueB - pb : 0; if (b <= 0.005){ b = 0; if (bOpen && bOff === null) bOff = m; }
+      ti += ia+ib; tp += pa+pb;
+      if (a+b > peak) peak = a+b;
+      rows.push({m:m, a:pa, b:pb, int:ia+ib, prin:(pa+pb)-(ia+ib), balA:a, balB:b, bal:a+b});
+      curve.push(a+b);
+      if (a+b <= 0.005){ off = m; break; }
+    }
+    return {bal:a+b, interest:ti, paid:tp, rows:rows, curve:curve, off:off, bOff:bOff, aOff:aOff, peak:peak};
+  }
+
+  function atHorizon(res){
+    var n = Math.min(cfg.term, res.curve.length-1);
+    return res.curve[n];
+  }
+
+  function buildControls(){
+    var bmax = nice(Math.max(monthInterest()*3, cfg.cmp*1.6, 1000));
+    bslider.max = bmax; bslider.step = Math.max(1, nice(bmax/125));
+    budgetIn.step = bslider.step;
+    var t = $('bticks'); t.innerHTML='';
+    for (var k=0;k<=4;k++){ var s=document.createElement('span'); s.textContent=money(bmax*k/4); t.appendChild(s); }
+
+    var budget = Math.max(0, Number(budgetIn.value)||0);
+    var rng = splitRange(budget);
+    var lo = Math.round(rng.lo), hi = Math.round(rng.hi), span = hi - lo;
+    var step = 1, cand = [500,250,100,50,25,10,5,1];
+    for (var ci=0; ci<cand.length; ci++){
+      if (span >= cand[ci]*8 && span % cand[ci] === 0){ step = cand[ci]; break; }
+    }
+    sslider.min = lo;
+    sslider.max = span > 0 ? hi : lo+1;
+    sslider.step = step;
+    sslider.disabled = span < 1;
+    if (Number(sslider.value) < lo) sslider.value = lo;
+    if (Number(sslider.value) > hi) sslider.value = hi;
+
+    var shost = $('schips'); shost.innerHTML = '';
+    if (span > 0){
+      [{v:hi, t:cfg.a.name+' at its minimum ('+cash(floorA())+')'},
+       {v:lo, t:cfg.b.name+' at its minimum ('+cash(floorB())+')'},
+       {v:Math.round(lo+span/2), t:'Halfway'}].forEach(function(o){
+        var btn = document.createElement('button');
+        btn.type='button'; btn.className='chip'; btn.dataset.s=o.v; btn.textContent=o.t;
+        btn.addEventListener('click', function(){ sslider.value = o.v; render(); });
+        shost.appendChild(btn);
+      });
+    }
+
+    var need = requiredFor(cfg.term);
+    var vals = [Math.round(monthInterest()), Math.round(floorTotal()), cfg.cmp, Math.ceil(need/100)*100].filter(function(v){ return v>0; });
+    vals = vals.filter(function(v,i,arr){ return arr.indexOf(v)===i; }).sort(function(x,y){ return x-y; });
+    var host = $('bchips'); host.innerHTML='';
+    vals.forEach(function(v){
+      var lab = Math.abs(v-floorTotal()) < 1 ? 'Bank minimum: ' + money(v)
+              : v === cfg.cmp ? cfg.cmplab + ': ' + money(v)
+              : (Math.abs(v-monthInterest()) < 1 ? 'Interest only: ' + money(v)
+              : 'Clears in ' + cfg.term + ': ' + money(v));
+      var btn = document.createElement('button');
+      btn.type='button'; btn.className='chip'; btn.dataset.v=v; btn.textContent=lab;
+      btn.addEventListener('click', function(){ setBudget(v); });
+      host.appendChild(btn);
+    });
+    return need;
+  }
+
+  function words(need){
+    var i0 = monthInterest();
+    var budget = Math.max(0, Number(budgetIn.value)||0);
+    var p0 = budget - i0;
+
+    document.title = cfg.a.name + ' + ' + cfg.b.name + ' \u2014 payment planner';
+    $('headline').textContent = 'Splitting ' + cash(budget) + ' a month across ' + cash(total()) + ' of debt';
+    $('subhead').textContent = (p0 > 0
+      ? 'Interest takes ' + cash(i0) + ' of the first payment, so only ' + cash(p0) + ' of it actually reduces what you owe. To finish inside the ' + cfg.term + ' months left you need ' + cash(Math.ceil(need)) + ' a month.'
+      : 'The first month costs ' + cash(i0) + ' in interest, more than the ' + cash(budget) + ' you are paying, so the balance grows. You need ' + cash(Math.ceil(need)) + ' a month to finish inside the ' + cfg.term + ' months left.');
+
+    $('f-bal').textContent = cash(total());
+    $('f-int').textContent = cash(i0);
+    $('f-prin-l').textContent = p0 >= 0 ? 'Principal this month' : 'Shortfall this month';
+    $('f-prin').textContent = cash(Math.abs(p0));
+    $('f-need-l').textContent = 'To clear in ' + cfg.term;
+    $('f-need').textContent = cash(Math.ceil(need)) + ' / mo';
+
+    $('budget-help').textContent = cfg.a.name + ' and ' + cfg.b.name + ' together. This total is what decides the payoff \u2014 the split below barely moves it while both rates are the same.';
+    $('budget-note').innerHTML = 'interest takes <b>' + cash(i0) + '</b> of it';
+    $('split-help').textContent = 'Drag to move money between the two loans. The slider stops at the minimums your bank allows: '
+      + cash(Math.max(0,cfg.a.min)) + ' for ' + cfg.a.name.toLowerCase() + ' and ' + cash(Math.max(0,cfg.b.min))
+      + ' for ' + cfg.b.name.toLowerCase() + ' (' + cash(floorTotal()) + ' between them). A minimum is released once that loan is cleared.';
+    $('leg-now').textContent = 'Paying ' + cash(budget);
+    $('leg-base').textContent = cfg.cmplab + ' ' + cash(cfg.cmp);
+    $('l-save').textContent = 'Interest vs ' + cfg.cmplab.toLowerCase();
+    $('l-horizon').textContent = 'Owed at month ' + cfg.term;
+    $('l-small').textContent = cfg.b.name + ' cleared';
+    $('h-a').textContent = cfg.a.name;
+    $('h-b').textContent = cfg.b.name;
+    $('th-a').textContent = 'To ' + cfg.a.name.toLowerCase();
+    $('th-b').textContent = 'To ' + cfg.b.name.toLowerCase();
+    $('th-left-a').textContent = cfg.a.name + ' left';
+    $('th-left-b').textContent = cfg.b.name + ' left';
+    $('foot').textContent = 'Interest is charged on each loan\u2019s balance at the start of the month (rate \u00F7 12) and anything above it reduces principal that same month. Fees, insurance, prepayment penalties and any rate reset after a promotional period are not included, so check the exact figures with your bank.';
+  }
+
+  function chart(now, base){
+    var w=700,h=280,L=74,R=12,T=14,B=34;
+    var n = Math.max(1, cfg.term);
+    var top = Math.max(total(), now.peak, base.peak, 1);
+    var x=function(m){ return L+(w-L-R)*Math.min(m/n,1); };
+    var y=function(v){ return T+(h-T-B)*(1-Math.max(0,Math.min(v,top))/top); };
+    var s=[];
+    for (var g=0; g<=4; g++){
+      var val=top*g/4, yy=y(val);
+      s.push('<line x1="'+L+'" y1="'+yy.toFixed(1)+'" x2="'+(w-R)+'" y2="'+yy.toFixed(1)+'" stroke="var(--line)"/>');
+      s.push('<text x="'+(L-8)+'" y="'+(yy+4).toFixed(1)+'" text-anchor="end" font-size="11" fill="var(--ink-soft)">'+money(val/1e6,1)+'M</text>');
+    }
+    var step = Math.max(1, nice(n/7));
+    for (var m=0; m<=n; m+=step)
+      s.push('<text x="'+x(m).toFixed(1)+'" y="'+(h-12)+'" text-anchor="middle" font-size="11" fill="var(--ink-soft)">'+m+'</text>');
+    s.push('<text x="'+x(n/2).toFixed(1)+'" y="'+(h+5)+'" text-anchor="middle" font-size="11" fill="var(--ink-soft)">month</text>');
+
+    function path(c){
+      var d='', last=Math.min(c.length-1,n);
+      for (var k=0;k<=last;k++) d += (k?' L ':'M ')+x(k).toFixed(1)+' '+y(c[k]).toFixed(1);
+      if (c.length-1 < n && c[c.length-1] <= 0.005) d += ' L '+x(n).toFixed(1)+' '+y(0).toFixed(1);
+      return d;
+    }
+    var pNow=path(now.curve);
+    s.push('<path d="'+pNow+' L '+x(n).toFixed(1)+' '+y(0).toFixed(1)+' L '+x(0)+' '+y(0).toFixed(1)+' Z" fill="var(--jade-soft)" opacity="0.7"/>');
+    s.push('<path d="'+path(base.curve)+'" fill="none" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="5 5"/>');
+    s.push('<path d="'+pNow+'" fill="none" stroke="var(--jade)" stroke-width="3" stroke-linejoin="round"/>');
+
+    var hz = atHorizon(now);
+    if (now.off && now.off <= n){
+      s.push('<circle cx="'+x(now.off).toFixed(1)+'" cy="'+y(0).toFixed(1)+'" r="5" fill="var(--jade)"/>');
+    } else {
+      s.push('<line x1="'+x(n).toFixed(1)+'" y1="'+y(0).toFixed(1)+'" x2="'+x(n).toFixed(1)+'" y2="'+y(hz).toFixed(1)+'" stroke="var(--crimson)" stroke-width="3"/>');
+      s.push('<text x="'+(x(n)-8).toFixed(1)+'" y="'+y(hz/2).toFixed(1)+'" text-anchor="end" font-size="11" fill="var(--crimson)">still owed</text>');
+    }
+    if (now.bOff && now.bOff <= n)
+      s.push('<circle cx="'+x(now.bOff).toFixed(1)+'" cy="'+y(now.curve[now.bOff]).toFixed(1)+'" r="4" fill="var(--brass)"/>');
+    $('chart').innerHTML = s.join('');
+  }
+
+  function table(res){
+    var parts=[], lim=Math.min(res.rows.length, cfg.term), r;
+    for (var k=0;k<lim;k++){
+      r=res.rows[k];
+      parts.push('<tr><td>'+r.m+'</td><td>'+money(r.a)+'</td><td>'+money(r.b)+'</td><td class="int">'+
+        money(r.int)+'</td><td>'+money(r.prin)+'</td>'+
+        '<td'+(r.balA<=0.005?' class="done"':'')+'>'+money(r.balA)+'</td>'+
+        '<td'+(r.balB<=0.005?' class="done"':'')+'>'+money(r.balB)+'</td>'+
+        '<td class="tot">'+money(r.bal)+'</td></tr>');
+    }
+    $('rows').innerHTML = parts.join('');
+  }
+
+  function render(){
+    var need = buildControls();
+    var budget = Math.max(0, Number(budgetIn.value)||0);
+    var toB = splitOf(budget);
+    var toA = budget - toB;
+    words(need);
+
+    var now = simulate(budget, toB, roll.checked, MAXM);
+    var cmpB = Math.min(toB, cfg.cmp);
+    var base = simulate(cfg.cmp, cmpB, roll.checked, MAXM);
+
+    var pa = budget>0 ? toA/budget*100 : 50;
+    $('bar-a').style.width = pa+'%'; $('bar-b').style.width = (100-pa)+'%';
+    $('amt-a').textContent = pa>16 ? money(toA) : '';
+    $('amt-b').textContent = (100-pa)>16 ? money(toB) : '';
+    $('lab-a').textContent = cfg.a.name + ' \u2014 ' + cash(toA) +
+      (toA <= floorA()+0.5 ? ' (at minimum)' : ' (min ' + cash(floorA()) + ')');
+    $('lab-b').textContent = cfg.b.name + ' \u2014 ' + cash(toB) +
+      (toB <= floorB()+0.5 ? ' (at minimum)' : ' (min ' + cash(floorB()) + ')');
+    $('floor-a').style.left = (budget>0 ? Math.min(100, floorA()/Math.max(toA,1)*100) : 0) + '%';
+    $('floor-a').hidden = !(floorA() > 0 && toA > floorA()+0.5);
+    $('floor-b').style.left = (budget>0 ? Math.min(100, floorB()/Math.max(toB,1)*100) : 0) + '%';
+    $('floor-b').hidden = !(floorB() > 0 && toB > floorB()+0.5);
+
+    var warn = $('split-warn');
+    if (!feasible(budget)){
+      warn.hidden = false;
+      warn.textContent = cash(budget) + ' is below the ' + cash(floorTotal()) +
+        ' your bank requires between the two loans \u2014 short by ' + cash(floorTotal()-budget) +
+        '. The figures below assume the shortfall is spread across both, which the bank would not accept.';
+    } else if (Math.abs(budget - floorTotal()) < 0.5){
+      warn.hidden = false;
+      warn.textContent = 'You are paying exactly the bank minimum, so there is nothing to move: both loans are pinned to their floor.';
+    } else {
+      warn.hidden = true;
+    }
+
+    var v=$('verdict'), hz=atHorizon(now);
+    if (now.off && now.off <= cfg.term){
+      v.className='verdict clear';
+      $('v-label').textContent='Everything cleared in month '+now.off;
+      $('v-cur').textContent=''; $('v-amount').textContent=now.off; $('v-unit').textContent='months ('+yrs(now.off)+' years)';
+      $('v-read').innerHTML='Paying <b>'+cash(budget)+'</b> a month clears both loans '+(cfg.term-now.off)+
+        ' months inside the '+cfg.term+' you have left, with <b>'+cash(now.interest)+'</b> of interest in total.';
+    } else {
+      v.className='verdict';
+      $('v-label').textContent='Still owed after month '+cfg.term;
+      $('v-cur').textContent=cfg.cur; $('v-amount').textContent=money(hz); $('v-unit').textContent='';
+      var tail = now.off ? 'At this rate it takes <b>'+now.off+' months ('+yrs(now.off)+' years)</b> to finish, '+
+                           (now.off-cfg.term)+' months past the end of the contract. '
+                         : 'At this rate the debt never clears \u2014 the payment is below the interest. ';
+      $('v-read').innerHTML='After '+cfg.term+' months of <b>'+cash(budget)+'</b> you would still owe <b>'+cash(hz)+
+        '</b>. '+tail+'To finish on time you need <b>'+cash(Math.ceil(need))+'</b> a month, '+
+        cash(Math.ceil(Math.max(0,need-budget)))+' more than now.';
+    }
+
+    $('r-int').textContent = cash(now.interest);
+    var diff = base.interest - now.interest;
+    $('r-save').textContent = Math.abs(diff) < 0.5 ? 'the same' : (diff>0?'\u2212':'+') + cash(Math.abs(diff));
+    $('r-save').parentElement.className = 'cell ' + (diff>=-0.5?'s':'bad');
+    $('r-horizon').textContent = cash(hz);
+    $('r-small').textContent = now.bOff ? 'month '+now.bOff+' ('+yrs(now.bOff)+' yrs)' : 'not within '+MAXM;
+
+    Array.prototype.forEach.call(document.querySelectorAll('#schips .chip'), function(c){
+      c.setAttribute('aria-pressed', String(Math.abs(Number(c.dataset.s)-toB) < 0.5));
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('#bchips .chip'), function(c){
+      c.setAttribute('aria-pressed', String(Math.abs(Number(c.dataset.v)-budget) < 0.5));
+    });
+
+    chart(now, base);
+    table(now);
+    $('chart-desc').textContent = (now.off && now.off<=cfg.term)
+      ? 'The balance reaches zero in month '+now.off+'.'
+      : 'The red bar at month '+cfg.term+' is the '+cash(hz)+' left when the contract runs out. Dashed line: '+
+        cfg.cmplab.toLowerCase()+' of '+cash(cfg.cmp)+'.';
+  }
+
+  function setBudget(v){
+    budgetIn.value = v;
+    bslider.value = Math.min(v, Number(bslider.max));
+    render();
+  }
+
+  function readCfg(){
+    cfg.a.name = $('i-name-a').value || 'Loan A';
+    cfg.b.name = $('i-name-b').value || 'Loan B';
+    cfg.a.bal = Math.max(0, Number($('i-bal-a').value)||0);
+    cfg.b.bal = Math.max(0, Number($('i-bal-b').value)||0);
+    cfg.a.rate = Math.max(0, Number($('i-rate-a').value)||0);
+    cfg.b.rate = Math.max(0, Number($('i-rate-b').value)||0);
+    cfg.a.min = Math.max(0, Number($('i-min-a').value)||0);
+    cfg.b.min = Math.max(0, Number($('i-min-b').value)||0);
+    cfg.term = Math.min(720, Math.max(1, Math.round(Number($('i-term').value)||1)));
+    cfg.cmp = Math.max(0, Number($('i-cmp').value)||0);
+    cfg.cmplab = $('i-cmplab').value || 'Comparison';
+    cfg.cur = ($('i-cur').value||'').slice(0,4);
+  }
+
+  budgetIn.addEventListener('input', function(){
+    bslider.value = Math.min(Math.max(0,Number(budgetIn.value)||0), Number(bslider.max)); render();
+  });
+  bslider.addEventListener('input', function(){ budgetIn.value = bslider.value; render(); });
+  sslider.addEventListener('input', render);
+  roll.addEventListener('change', render);
+  ['i-name-a','i-bal-a','i-rate-a','i-min-a','i-name-b','i-bal-b','i-rate-b','i-min-b','i-term','i-cmp','i-cmplab','i-cur']
+    .forEach(function(id){ $(id).addEventListener('input', function(){ readCfg(); render(); }); });
+
+  readCfg();
+  render();
+})();
+</script>
+<script>
+(function(){
+  function stub(id){
+    if (typeof console !== 'undefined') console.warn('loan-tools: missing element #s-'+id);
+    return {style:{}, dataset:{}, textContent:'', innerHTML:'', value:'', hidden:true, checked:false,
+            className:'', parentElement:{}, setAttribute:function(){}, addEventListener:function(){},
+            appendChild:function(){}, classList:{add:function(){}, remove:function(){}}};
+  }
+  var $ = function(id){ return document.getElementById('s-'+id) || stub(id); };
+  var extraIn = $('extra'), slider = $('slider');
+  var loan = { bal:692792, rate:2.5, term:324, pay:2500, cur:'\u0E3F' };
+
+  function money(n,dp){ dp=dp||0; return isFinite(n)?n.toLocaleString('en-US',{minimumFractionDigits:dp,maximumFractionDigits:dp}):'\u2014'; }
+  function cash(n,dp){ return loan.cur+money(n,dp); }
+  function plural(n,w){ return n+' '+w+(n===1?'':'s'); }
+  function nice(v){
+    if (v<=0) return 0;
+    var mag=Math.pow(10,Math.floor(Math.log(v)/Math.LN10)), st=[1,1.5,2,2.5,3,4,5,7.5,10];
+    for (var k=0;k<st.length;k++) if (v<=st[k]*mag-1e-9) return st[k]*mag;
+    return 10*mag;
+  }
+  function roundTo(v){
+    if (v<=0) return 0;
+    var mag=Math.pow(10,Math.floor(Math.log(v)/Math.LN10));
+    var unit=Math.max(1,mag/10);
+    return Math.round(v/unit)*unit;
+  }
+  function rateMonthly(){ return (loan.rate/100)/12; }
+
+  function run(payment, months){
+    var r=rateMonthly(), b=loan.bal, ti=0, tp=0, rows=[], curve=[b], off=null, peak=b;
+    for (var m=1;m<=months;m++){
+      var i=b*r, due=b+i, p=Math.min(payment,due);
+      b=due-p; ti+=i; tp+=p;
+      if (b>peak) peak=b;
+      rows.push({m:m,pay:p,int:i,prin:p-i,bal:b});
+      curve.push(b);
+      if (b<=0.005){ b=0; off=m; break; }
+    }
+    return {bal:b,interest:ti,paid:tp,rows:rows,curve:curve,off:off,peak:peak};
+  }
+  function required(){
+    var r=rateMonthly();
+    if (r===0) return loan.bal/loan.term;
+    return loan.bal*r/(1-Math.pow(1+r,-loan.term));
+  }
+  function monthsAt(payment){
+    var r=rateMonthly();
+    if (payment<=0) return null;
+    if (r===0) return Math.ceil(loan.bal/payment);
+    if (payment<=loan.bal*r) return null;
+    return Math.ceil(-Math.log(1-loan.bal*r/payment)/Math.log(1+r));
+  }
+  function needExtra(){ return Math.max(0, required()-loan.pay); }
+
+  function buildSlider(){
+    var max=nice(Math.max(needExtra()*2, loan.pay, 500));
+    slider.max=max; slider.step=Math.max(1,nice(max/100)); extraIn.step=slider.step;
+    var t=$('ticks'); t.innerHTML='';
+    for (var k=0;k<=4;k++){ var s=document.createElement('span'); s.textContent=money(max*k/4); t.appendChild(s); }
+  }
+  function buildChips(){
+    var need=Math.ceil(needExtra()), vals=[0];
+    if (need>0){ vals.push(roundTo(need/3),roundTo(need*2/3),need); }
+    else { vals.push(roundTo(loan.pay*0.1),roundTo(loan.pay*0.25),roundTo(loan.pay*0.5)); }
+    vals=vals.filter(function(v,i,a){ return v>=0 && a.indexOf(v)===i; }).sort(function(a,b){ return a-b; });
+    var host=$('chips'); host.innerHTML='';
+    vals.forEach(function(v){
+      var b=document.createElement('button');
+      b.type='button'; b.className='chip'; b.dataset.v=v;
+      b.textContent = v===0 ? 'Nothing extra'
+        : (need>0 && v===need ? 'Clears it in '+loan.term+': +'+money(v) : '+'+money(v));
+      b.addEventListener('click', function(){ setExtra(v); });
+      host.appendChild(b);
+    });
+  }
+  function buildTermChips(){
+    var host=$('termchips'); host.innerHTML='';
+    [36,60,120,180,240,324,360].forEach(function(t){
+      var b=document.createElement('button');
+      b.type='button'; b.className='chip'; b.dataset.t=t; b.textContent=t+' months';
+      b.addEventListener('click', function(){ $('i-term').value=t; readLoan(); rebuild(); render(); });
+      host.appendChild(b);
+    });
+  }
+
+  function words(){
+    var r=rateMonthly(), i1=loan.bal*r, p1=loan.pay-i1, need=needExtra();
+    $('headline').textContent='What happens if you add to the '+cash(loan.pay)+' a month';
+    var s;
+    if (loan.pay<=0){
+      s='With no required payment set, nothing is being repaid: '+cash(i1)+' of interest is added in month 1 and the balance keeps growing. Add a payment below, then use the slider.';
+    } else if (p1<=0){
+      s='The '+cash(loan.pay)+' payment does not even cover month 1 interest of '+cash(i1)+', so the balance grows instead of shrinking. Move the slider to see where you stand at month '+loan.term+'.';
+    } else {
+      s='Your balance only drops by about '+cash(p1)+' of principal in month 1, because '+cash(i1)+' of every '+cash(loan.pay)+' payment goes straight to interest. Move the slider to see where you stand at month '+loan.term+'.';
+    }
+    $('subhead').textContent=s;
+    $('f-bal').textContent=cash(loan.bal,2);
+    $('f-rate').textContent=loan.rate+'% per year';
+    $('f-term').textContent=loan.term+' months';
+    $('f-pay').textContent=cash(loan.pay)+' / mo';
+    $('f-need-l').textContent='To clear it in '+loan.term;
+    $('f-need').textContent=cash(Math.ceil(required()))+' / mo';
+    $('extra-help').textContent='On top of the required '+cash(loan.pay)+
+      (need>0 ? '. You need about '+cash(Math.ceil(need))+' more to finish inside '+loan.term+' months.'
+              : '. The required payment already clears this loan inside '+loan.term+' months.');
+    $('leg-base').textContent='Paying only '+cash(loan.pay);
+    $('l-paid').textContent='Paid in over '+loan.term+' months';
+    $('l-save').textContent='Interest saved vs '+cash(loan.pay);
+    $('foot').textContent='Interest is worked out on the balance left at the start of each month ('+loan.rate+
+      '% \u00F7 12 = '+(rateMonthly()*100).toFixed(4)+'% a month), and anything extra goes to principal straight away. '+
+      'Fees, insurance and prepayment penalties are not included.';
+  }
+
+  function chart(now, base){
+    var w=700,h=280,L=70,R=12,T=14,B=34, n=loan.term;
+    var top=Math.max(loan.bal, now.peak, base.peak, 1);
+    var x=function(m){ return L+(w-L-R)*(n?m/n:0); };
+    var y=function(v){ return T+(h-T-B)*(1-Math.max(0,Math.min(v,top))/top); };
+    var s=[];
+    for (var g=0;g<=4;g++){
+      var val=top*g/4, yy=y(val);
+      s.push('<line x1="'+L+'" y1="'+yy.toFixed(1)+'" x2="'+(w-R)+'" y2="'+yy.toFixed(1)+'" stroke="var(--line)"/>');
+      s.push('<text x="'+(L-8)+'" y="'+(yy+4).toFixed(1)+'" text-anchor="end" font-size="11" fill="var(--ink-soft)">'+money(val)+'</text>');
+    }
+    var step=Math.max(1,nice(n/7));
+    for (var m=0;m<=n;m+=step)
+      s.push('<text x="'+x(m).toFixed(1)+'" y="'+(h-12)+'" text-anchor="middle" font-size="11" fill="var(--ink-soft)">'+m+'</text>');
+    s.push('<text x="'+x(n/2).toFixed(1)+'" y="'+(h+5)+'" text-anchor="middle" font-size="11" fill="var(--ink-soft)">month</text>');
+    function path(c){
+      var d='';
+      for (var k=0;k<c.length;k++) d += (k?' L ':'M ')+x(k).toFixed(1)+' '+y(Math.max(c[k],0)).toFixed(1);
+      if (c.length-1<n) d += ' L '+x(n).toFixed(1)+' '+y(0).toFixed(1);
+      return d;
+    }
+    var pNow=path(now.curve);
+    s.push('<path d="'+pNow+' L '+x(n).toFixed(1)+' '+y(0).toFixed(1)+' L '+x(0)+' '+y(0).toFixed(1)+' Z" fill="var(--jade-soft)" opacity="0.7"/>');
+    s.push('<path d="'+path(base.curve)+'" fill="none" stroke="var(--ink-soft)" stroke-width="2" stroke-dasharray="5 5"/>');
+    s.push('<path d="'+pNow+'" fill="none" stroke="var(--jade)" stroke-width="3" stroke-linejoin="round"/>');
+    var endM=now.off||n, endV=now.off?0:now.bal;
+    s.push('<circle cx="'+x(endM).toFixed(1)+'" cy="'+y(Math.max(endV,0)).toFixed(1)+'" r="5" fill="var(--jade)"/>');
+    if (!now.off && now.bal>0){
+      s.push('<line x1="'+x(n).toFixed(1)+'" y1="'+y(0).toFixed(1)+'" x2="'+x(n).toFixed(1)+'" y2="'+y(now.bal).toFixed(1)+'" stroke="var(--crimson)" stroke-width="3"/>');
+      s.push('<text x="'+(x(n)-8).toFixed(1)+'" y="'+y(now.bal/2).toFixed(1)+'" text-anchor="end" font-size="11" fill="var(--crimson)">left over</text>');
+    }
+    $('chart').innerHTML=s.join('');
+  }
+
+  function table(res){
+    var parts=[], r;
+    for (var k=0;k<res.rows.length;k++){
+      r=res.rows[k];
+      parts.push('<tr><td>'+r.m+'</td><td>'+money(r.pay)+'</td><td class="int">'+money(r.int)+
+        '</td><td>'+money(r.prin)+'</td><td>'+money(r.bal)+'</td></tr>');
+    }
+    $('rows').innerHTML = parts.join('');
+  }
+
+  function render(){
+    var extra=Math.max(0,Number(extraIn.value)||0), payment=loan.pay+extra;
+    var now=run(payment,loan.term), base=run(loan.pay,loan.term), v=$('verdict');
+    $('totalpay').textContent=cash(payment);
+    if (now.off){
+      v.className='verdict clear';
+      $('v-label').textContent='Cleared in month '+now.off;
+      $('v-amount').textContent='0';
+      var early=loan.term-now.off;
+      $('v-read').innerHTML='Paying <b>'+cash(payment)+'</b> a month clears this loan in <b>'+plural(now.off,'month')+'</b>'+
+        (early>0?', '+plural(early,'month')+' inside the '+loan.term+' you are looking at':'')+
+        '. Total interest: <b>'+cash(now.interest)+'</b>, which is '+cash(Math.max(0,base.interest-now.interest))+
+        ' less than the '+cash(loan.pay)+' plan costs over '+loan.term+' months.';
+    } else {
+      v.className='verdict';
+      $('v-label').textContent='Still owed after month '+loan.term;
+      $('v-amount').textContent=money(now.bal);
+      var mo=monthsAt(payment);
+      var tail=mo?'At this rate it would take about <b>'+plural(mo,'month')+'</b> ('+(mo/12).toFixed(1)+' years) to finish. '
+                 :'At this rate the balance never goes down \u2014 the payment is below the monthly interest. ';
+      $('v-read').innerHTML='After '+loan.term+' months of <b>'+cash(payment)+'</b> you have paid in '+cash(now.paid)+
+        ' and still owe <b>'+cash(now.bal)+'</b>. '+tail+'To finish inside '+loan.term+' months you would need about <b>'+
+        cash(Math.ceil(needExtra()))+' extra</b> a month, so '+cash(Math.ceil(required()))+' in total.';
+    }
+    $('r-paid').textContent=cash(now.paid);
+    $('r-int').textContent=cash(now.interest);
+    $('r-prin').textContent=cash(now.paid-now.interest);
+    $('r-save').textContent=cash(Math.max(0,base.interest-now.interest));
+    Array.prototype.forEach.call(document.querySelectorAll('#s-chips .chip'), function(c){
+      c.setAttribute('aria-pressed', String(Number(c.dataset.v)===extra));
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('#s-termchips .chip'), function(c){
+      c.setAttribute('aria-pressed', String(Number(c.dataset.t)===loan.term));
+    });
+    chart(now,base); table(now);
+    $('chart-desc').textContent = now.off
+      ? 'The balance reaches zero in month '+now.off+'.'
+      : 'The red bar at month '+loan.term+' is the '+cash(now.bal)+' you would still have to settle.';
+  }
+
+  function setExtra(v){ extraIn.value=v; slider.value=Math.min(v,Number(slider.max)); render(); }
+  function readLoan(){
+    loan.bal=Math.max(0,Number($('i-bal').value)||0);
+    loan.rate=Math.max(0,Number($('i-rate').value)||0);
+    loan.term=Math.min(720,Math.max(1,Math.round(Number($('i-term').value)||1)));
+    loan.pay=Math.max(0,Number($('i-pay').value)||0);
+    loan.cur=($('i-cur').value||'').slice(0,4);
+  }
+  function rebuild(){
+    buildSlider(); buildChips(); words();
+    if (Number(extraIn.value)>Number(slider.max)) extraIn.value=slider.max;
+    slider.value=Math.min(Math.max(0,Number(extraIn.value)||0),Number(slider.max));
+  }
+  extraIn.addEventListener('input', function(){
+    slider.value=Math.min(Math.max(0,Number(extraIn.value)||0),Number(slider.max)); render();
+  });
+  slider.addEventListener('input', function(){ extraIn.value=slider.value; render(); });
+  ['i-bal','i-rate','i-term','i-pay','i-cur'].forEach(function(id){
+    $(id).addEventListener('input', function(){ readLoan(); rebuild(); render(); });
+  });
+  buildTermChips(); readLoan(); rebuild(); render();
+})();
+</script>
+</body>
+</html>
